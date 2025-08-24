@@ -1,15 +1,24 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Methods: POST, GET, DELETE, PUT, OPTIONS');
 
-include('helper.php');
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+include('helper.php'); 
+include("../../connect.php"); 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    include("../../connect.php");
 
     $form_data = json_decode(file_get_contents("php://input"));
+    
     if ($form_data != NULL) {
-        if ($form_data->keluarga != "" && $form_data->tujuan != "" && $form_data->kota != "" && $form_data->transportasi != "") {
+        if (!empty($form_data->keluarga) && !empty($form_data->tujuan) && !empty($form_data->kota) && !empty($form_data->transportasi)) {
+            
             $keluarga = $form_data->keluarga;
             $tujuan = $form_data->tujuan;
             $kota = $form_data->kota;            
@@ -17,15 +26,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $store = $connect->query("INSERT INTO liburan (keluarga, tujuan, kota, transportasi) VALUES ('$keluarga', '$tujuan', '$kota', '$transportasi')");
 
-            $array_api = response_json(200, 'berhasil menambah data liburan');
+            if($store){
+                $array_api = response_json(200, 'Berhasil menambah data holiday');
+            } else {
+                $array_api = response_json(500, 'Gagal menambah data holiday: ' . $connect->error);
+            }
+
         } else {
-            $array_api = response_json(400, 'gagal menambah data liburan, data tidak lengkap.');
+            $array_api = response_json(400, 'Gagal menambah data holiday, data tidak lengkap.');
         }
+
     } else {
-        $array_api = response_json(400, 'gagal menambah data liburan, data tidak boleh kosong.');
+        $array_api = response_json(400, 'Gagal menambah data holiday, data tidak boleh kosong.');
     }
+
 } else {
-    $array_api = response_json(405, 'metode tidak diizinkan.');
+    $array_api = response_json(405, 'Metode tidak diizinkan.');
 }
 
 echo json_encode($array_api);
