@@ -1,12 +1,12 @@
 <?php
 
 header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *");
 
 include('helper.php');  
+include("../../connect.php");
 
 if($_SERVER['REQUEST_METHOD'] == 'GET') {
-    include("../../connect.php");
-
     $read = $connect->query("SELECT * FROM liburan");
     $result = $read->fetch_all(MYSQLI_ASSOC);
 
