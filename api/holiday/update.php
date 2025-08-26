@@ -1,7 +1,13 @@
 <?php
-
 header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 include('helper.php');
 
@@ -9,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
     include("../../connect.php");
 
     if (isset($_GET['id'])) {
-
         if ($_GET['id'] != "") {
             $id = $_GET['id'];
 
@@ -18,8 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
 
             if ($user != NULL) {
                 $form_data = json_decode(file_get_contents("php://input"));
-        
-                if ($form_data->keluarga != "" && $form_data->tujuan != "" && $form_data->kota != "" && $form_data->transportasi != "") {
+
+                if (!empty($form_data->keluarga) && !empty($form_data->tujuan) && !empty($form_data->kota) && !empty($form_data->transportasi)
+                ) {
                     $keluarga = $form_data->keluarga;
                     $tujuan = $form_data->tujuan;
                     $kota = $form_data->kota;
@@ -28,8 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
                     $update = $connect->query("UPDATE liburan SET keluarga = '$keluarga', tujuan = '$tujuan', kota = '$kota', transportasi = '$transportasi' WHERE id = '$id'");
 
                     $array_api = response_json(200, 'berhasil mengupdate data liburan');
-                }
-                else {
+                } else {
                     $array_api = response_json(400, 'gagal mengupdate data liburan, formulir tidak lengkap.');
                 }
             } else {
@@ -46,5 +51,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
 }
 
 echo json_encode($array_api);
-
 ?>
